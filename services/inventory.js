@@ -46,6 +46,12 @@ app.post("/reservations/:id/confirm", (req, res) => {
     const reservation = reservations[req.params.id];
     if (!reservation)
       return res.status(404).json({ error: "Reservation not found" });
+    if (reservation.status === "confirmed")
+      return res.json({ message: "Reservation already confirmed" });
+    if (reservation.status !== "temporary")
+      return res
+        .status(409)
+        .json({ error: `Cannot confirm a ${reservation.status} reservation` });
 
     reservation.status = "confirmed";
     res.json({ message: "Reservation confirmed" });
@@ -61,10 +67,16 @@ app.post("/reservations/:id/release", (req, res) => {
     const reservation = reservations[req.params.id];
     if (!reservation)
       return res.status(404).json({ error: "Reservation not found" });
+    if (reservation.status === "released")
+      return res.json({ message: "Reservation already released" });
+    if (reservation.status !== "temporary")
+      return res
+        .status(409)
+        .json({ error: `Cannot release a ${reservation.status} reservation` });
 
     const event = events.find((e) => e.id === reservation.eventId);
     event.disponibility++;
-    delete reservations[req.params.id];
+    reservation.status = "released";
 
     res.json({ message: "Space released" });
   } catch (error) {
