@@ -1,0 +1,31 @@
+{
+  "name": "justemicro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:identity": "nodemon ./services/identity.js",
+    "dev:inventory": "nodemon ./services/inventory.js",
+    "dev:payment": "nodemon ./services/payment.js",
+    "dev:booking": "nodemon ./services/booking.js",
+    "dev": "concurrently --kill-others --names \"identity,inventory,payment,booking\" --prefix-colors \"cyan,green,yellow,magenta\" \"pnpm dev:identity\" \"pnpm dev:inventory\" \"pnpm dev:payment\" \"pnpm dev:booking\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.9.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "nodemon": "^3.1.14"
+  }
+}
