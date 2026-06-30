@@ -80,14 +80,27 @@ app.post("/bookings", async (req, res) => {
       });
     }
 
-    const release = () =>
-      fetch(
-        `${INVENTORY_SERVICE_URL}/reservations/${encodeURIComponent(reservation.reservationId)}/release`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      ).catch(() => {});
+    // release the temporary seat
+    const release = async () => {
+      try {
+        const releaseRes = await fetch(
+          `${INVENTORY_SERVICE_URL}/reservations/${encodeURIComponent(reservation.reservationId)}/release`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+        if (!releaseRes.ok) throw new Error(`status ${releaseRes.status}`);
+        return true;
+      } catch (error) {
+        console.error(
+          `Failed to release reservation ${reservation.reservationId} for booking ${booking.id}:`,
+          error.message,
+        );
+        booking.details.releaseFailed = true;
+        return false;
+      }
+    };
 
     // request payment (payment service expects { amount, card: { number } })
     let payment;
@@ -103,13 +116,13 @@ app.post("/bookings", async (req, res) => {
       // A refused payment is a 4xx but still a valid response body to inspect.
       payment = await payRes.json();
     } catch (error) {
-      await release();
       booking.status = "payment_failed";
       booking.updatedAt = new Date().toISOString();
       booking.details = {
         reason: "payment_service_error",
         error: error.message,
       };
+      await release();
       return res.status(502).json({
         id: booking.id,
         status: booking.status,
@@ -118,10 +131,10 @@ app.post("/bookings", async (req, res) => {
     }
 
     if (payment.status !== "accepted") {
-      await release();
       booking.status = "payment_failed";
       booking.updatedAt = new Date().toISOString();
       booking.details = { reason: "payment_refused", payment };
+      await release();
       return res.status(402).json({
         id: booking.id,
         status: booking.status,
@@ -148,10 +161,10 @@ app.post("/bookings", async (req, res) => {
       };
       return res.status(201).json({ id: booking.id, status: booking.status });
     } catch (error) {
-      await release();
       booking.status = "payment_failed";
       booking.updatedAt = new Date().toISOString();
       booking.details = { reason: "confirm_failed", error: error.message };
+      await release();
       return res.status(500).json({
         id: booking.id,
         status: booking.status,
