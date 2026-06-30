@@ -8,7 +8,12 @@
     "dev:inventory": "nodemon ./services/inventory.js",
     "dev:payment": "nodemon ./services/payment.js",
     "dev:booking": "nodemon ./services/booking.js",
-    "dev": "concurrently --kill-others --names \"identity,inventory,payment,booking\" --prefix-colors \"cyan,green,yellow,magenta\" \"pnpm dev:identity\" \"pnpm dev:inventory\" \"pnpm dev:payment\" \"pnpm dev:booking\""
+    "dev": "concurrently --kill-others --names \"identity,inventory,payment,booking\" --prefix-colors \"cyan,green,yellow,magenta\" \"pnpm dev:identity\" \"pnpm dev:inventory\" \"pnpm dev:payment\" \"pnpm dev:booking\"",
+    "start:identity": "node ./services/identity.js",
+    "start:inventory": "node ./services/inventory.js",
+    "start:payment": "node ./services/payment.js",
+    "start:booking": "node ./services/booking.js",
+    "start": "concurrently --kill-others --names \"identity,inventory,payment,booking\" --prefix-colors \"cyan,green,yellow,magenta\" \"pnpm start:identity\" \"pnpm start:inventory\" \"pnpm start:payment\" \"pnpm start:booking\""
   },
   "keywords": [],
   "author": "",
